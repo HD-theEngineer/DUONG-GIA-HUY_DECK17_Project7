@@ -33,4 +33,4 @@ with source as (
 
       from source
   )
-  select * from renamed
+  select * from renamed WHERE product_id IS NOT NULL
