@@ -1,0 +1,9 @@
+models:
+  - name: dim_date
+    description: "Staging table for raw crawl products"
+    columns:
+      - name: date_key
+        description: "Crawled products only"
+        tests:
+          - unique
+          - not_null
