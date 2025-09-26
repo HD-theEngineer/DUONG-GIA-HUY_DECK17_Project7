@@ -1,5 +1,5 @@
 sources:
-  - name: glamira_data_sources
+  - name: glamira
     database: angular-vortex-466913-g6
     schema: glamira_data
     tables:
