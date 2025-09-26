@@ -1,0 +1,9 @@
+sources:
+  - name: glamira_data_sources
+    database: angular-vortex-466913-g6
+    schema: glamira_data
+    tables:
+      - name: temp_raw_data
+      - name: raw_crawl_products
+      - name: raw_ip2location
+      - name: raw_exchange_rate
