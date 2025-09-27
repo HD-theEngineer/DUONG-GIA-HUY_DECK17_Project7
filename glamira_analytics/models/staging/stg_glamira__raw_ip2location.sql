@@ -4,13 +4,13 @@ with source as (
   renamed as (
       select
           {{ adapter.quote("ip") }},
-        {{ adapter.quote("country_short") }},
-        {{ adapter.quote("country_long") }},
-        {{ adapter.quote("region") }},
-        {{ adapter.quote("city") }},
-        {{ adapter.quote("latitude") }},
-        {{ adapter.quote("longitude") }},
-        {{ adapter.quote("zipcode") }}
+          {{ adapter.quote("country_short") }},
+          {{ adapter.quote("country_long") }},
+          {{ adapter.quote("region") }},
+          {{ adapter.quote("city") }},
+          {{ adapter.quote("latitude") }},
+          {{ adapter.quote("longitude") }},
+          {{ adapter.quote("zipcode") }}
 
       from source
   )

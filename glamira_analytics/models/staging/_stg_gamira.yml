@@ -18,3 +18,22 @@ models:
         description: "Indicate time range of this dataset"
         tests:
           - not_null
+  - name: stg_glamira__raw_ip2location
+    description: "Staging table for location data"
+    columns:
+      - name: ip
+        tests:
+          - unique
+          - not_null
+      - name: country_short
+        tests:
+          - not_null
+      - name: country_long
+        tests:
+          - not_null
+      - name: region
+        tests:
+          - not_null
+      - name: city
+        tests:
+          - not_null
