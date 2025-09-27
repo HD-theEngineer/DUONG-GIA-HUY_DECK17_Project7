@@ -1,9 +1,17 @@
 models:
   - name: dim_date
-    description: "Staging table for raw crawl products"
+    description: "Dimension table for date"
     columns:
       - name: date_key
-        description: "Crawled products only"
+        description: "Only date range in the raw activities data"
+        tests:
+          - unique
+          - not_null
+  - name: dim_store
+    description: "Dimension table for store"
+    columns:
+      - name: store_key
+        description: "Store key from raw activities data"
         tests:
           - unique
           - not_null
