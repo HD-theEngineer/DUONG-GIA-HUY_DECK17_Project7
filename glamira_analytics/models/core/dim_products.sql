@@ -3,9 +3,6 @@ WITH dim_product__load AS (
         product_key,
         product_name,
         gender,
-        price_usd,
-        min_price_usd,
-        max_price_usd
     FROM
         {{ ref('stg_glamira__products')}}
 )
@@ -15,9 +12,6 @@ WITH dim_product__load AS (
         product_key,
         COALESCE(product_name, 'XNA') AS product_name,
         COALESCE(gender, 'XNA') AS gender,
-        COALESCE(price_usd, CAST(0 AS FLOAT64)) AS price_usd,
-        COALESCE(min_price_usd, CAST(0 AS FLOAT64)) AS min_price_usd,
-        COALESCE(max_price_usd, CAST(0 AS FLOAT64)) AS max_price_usd,
     FROM
         dim_product__load
 )
@@ -32,9 +26,6 @@ WITH dim_product__load AS (
         -1 AS product_key,
         'XNA' AS product_name,
         'XNA' AS gender,
-        CAST(0 AS FLOAT64) AS price_usd,
-        CAST(0 AS FLOAT64) AS min_price_usd,
-        CAST(0 AS FLOAT64) AS max_price_usd
 )
 
 SELECT
