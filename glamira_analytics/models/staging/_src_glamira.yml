@@ -25,9 +25,9 @@ sources:
             data_tests:
               - unique
               - not_null
-      - name: raw_exchange_rate
+      - name: raw_exchange_rate_new
         columns:
-          - name: symbol
+          - name: country_code
             data_tests:
               - unique
               - not_null

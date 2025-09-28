@@ -37,3 +37,11 @@ models:
       - name: city
         tests:
           - not_null
+  - name: stg_glamira__products.sql
+    description: "Staging table for products"
+    columns:
+      - name: currency
+        data_tests:
+          - relationships:
+              field: symbol
+              to: ref('stg_glamira__raw_exchange_rate')
