@@ -39,4 +39,4 @@ with source as (
       from source
   )
 
-select * from renamed WHERE collection = 'checkout_success'
+select * from renamed --WHERE collection = 'checkout_success'

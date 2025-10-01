@@ -11,12 +11,14 @@ WITH stg__location_rename AS (
 
 , stg_glamira__exchange_rename AS (
     SELECT
-        TRIM(REGEXP_REPLACE(symbol, r"[0-9,\.\s'’]+",'')) AS currency_symbol,
+        TRIM(REGEXP_REPLACE(currency_symbol, r"[0-9,\s'’]+",'')) AS currency_symbol,
         country_code AS country_short_name,
-        SAFE_CAST(usd_exchange_rate AS FLOAT64) AS exchange_rate_to_usd
+        SAFE_CAST(exchange_rate_to_usd AS FLOAT64) AS exchange_rate_to_usd
 
     FROM
         {{ ref('stg_glamira__raw_exchange_rate') }}
+    WHERE
+        currency_symbol <> 'RD$'
 )
 
 , stg_glamira__location_join_rate AS (
@@ -39,8 +41,16 @@ WITH stg__location_rename AS (
 , stg__location_handle_invalid AS (
     SELECT
         location_key,
-        country_short_name,
-        country_name,
+        CASE 
+            WHEN TRIM(country_short_name) = '-' OR TRIM(country_short_name) = ''
+            THEN NULL 
+            ELSE country_short_name 
+        END AS country_short_name,
+        CASE 
+            WHEN TRIM(country_name) = '-' OR TRIM(country_name) = ''
+            THEN NULL 
+            ELSE country_name 
+        END AS country_name,
         CASE 
             WHEN TRIM(region_name) = '-' OR TRIM(region_name) = ''
             THEN NULL 

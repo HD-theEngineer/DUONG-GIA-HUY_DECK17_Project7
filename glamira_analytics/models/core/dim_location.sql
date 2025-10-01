@@ -7,11 +7,10 @@ WITH dim_location__load AS (
 , dim_location__null_handle AS (
     SELECT
         location_key,
-        country_name,
-        country_short_name,
+        COALESCE(country_name, 'XNA') AS country_name,
+        COALESCE(country_short_name, 'XNA') AS country_short_name,
         COALESCE(region_name, 'XNA') AS region_name,
         COALESCE(city_name, 'XNA') AS city_name,
-        COALESCE(ip_address, 'XNA') AS ip_address,
         COALESCE(currency_symbol, 'XNA') AS currency_symbol,
         COALESCE(exchange_rate_to_usd, 0) AS exchange_rate_to_usd
     FROM
@@ -25,7 +24,6 @@ WITH dim_location__load AS (
         country_short_name,
         region_name,
         city_name,
-        ip_address,
         currency_symbol,
         exchange_rate_to_usd
     FROM
@@ -37,10 +35,8 @@ WITH dim_location__load AS (
         'XNA' AS country_short_name,
         'XNA' AS region_name,
         'XNA' AS city_name,
-        'XNA' AS ip_address,
         'XNA' AS currency_symbol,
         CAST(0 AS FLOAT64) AS exchange_rate_to_usd
-
 )
 
 SELECT

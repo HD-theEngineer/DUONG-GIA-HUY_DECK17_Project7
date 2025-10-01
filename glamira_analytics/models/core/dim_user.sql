@@ -13,16 +13,8 @@ WITH dim_user__load AS (
         dim_user__load
 )
 
-, dim_user__deduplicate AS (
-    SELECT
-        DISTINCT user_key,
-        user_email_address,
-    FROM
-        dim_user__handle_null
-)
-
 SELECT
     *
 FROM
-    dim_user__deduplicate
+    dim_user__handle_null
 ORDER BY user_key
