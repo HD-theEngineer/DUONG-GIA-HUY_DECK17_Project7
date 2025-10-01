@@ -31,3 +31,11 @@ models:
         tests:
           - unique
           - not_null
+  - name: dim_user
+    description: "Dimension table for user"
+    columns:
+      - name: user_key
+        description: "user key from raw data"
+        tests:
+          - unique
+          - not_null
