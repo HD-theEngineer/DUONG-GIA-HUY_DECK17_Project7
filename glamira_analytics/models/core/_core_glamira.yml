@@ -39,3 +39,11 @@ models:
         tests:
           - unique
           - not_null
+  - name: fact_sales_order
+    description: "Dimension table for user"
+    columns:
+      - name: sales_order_key
+        description: "Unique key hash from date_key, location_key, order_key, product_key"
+        tests:
+          - unique
+          - not_null

@@ -1,5 +1,5 @@
 with source as (
-        select * from {{ source('glamira', 'raw_exchange_rate') }}
+        select * from {{ ref('exchange_rate') }}
   ),
   renamed as (
       select
@@ -11,4 +11,3 @@ with source as (
       from source
   )
   select * from renamed
-    

@@ -36,3 +36,16 @@ models:
       +materialized: view
     core:
       +materialized: table
+seeds:
+  glamira_analytics:
+    +enabled: true
+    # This configures seeds/country_codes.csv
+    exchange_rate:
+      +schema: staging
+      +quote_columns: true
+      +column_types:
+        country_name: STRING
+        country_code: STRING
+        currency_symbol: STRING
+        currency_name: STRING
+        exchange_rate_to_usd: FLOAT
