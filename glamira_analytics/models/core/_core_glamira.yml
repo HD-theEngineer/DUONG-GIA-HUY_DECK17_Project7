@@ -47,3 +47,27 @@ models:
         tests:
           - unique
           - not_null
+  - name: dim_stone
+    description: "Dimension table for stone"
+    columns:
+      - name: stone_key
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+  - name: dim_alloy
+    description: "Dimension table for alloy"
+    columns:
+      - name: alloy_key
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+  - name: dim_option
+    description: "Dimension table for option"
+    columns:
+      - name: option_key
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null

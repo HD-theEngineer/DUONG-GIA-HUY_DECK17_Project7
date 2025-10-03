@@ -35,7 +35,8 @@ WITH stg_glamira__order_rename AS (
                 cart.currency,r"[0-9,\.\s'’]+",''
             )
         )                                                                   AS currency_symbol,
-        cart.option                                                         AS product_option
+        cart.option[SAFE_OFFSET(0)].value_label                             AS product_option_1,
+        cart.option[SAFE_OFFSET(1)].value_label                             AS product_option_2
     FROM
         {{ ref("stg_glamira__temp_raw_data")}} r,
         UNNEST(r.cart_products) AS cart
@@ -72,7 +73,14 @@ WITH stg_glamira__order_rename AS (
         country_short_name,
         order_key,
         product_key,
-        product_option,
+        CASE 
+            WHEN product_option_2 IS NULL THEN NULL
+            ELSE product_option_1
+        END AS stone_option,
+        CASE 
+            WHEN product_option_2 IS NULL THEN product_option_1
+            ELSE product_option_2
+        END AS alloy_option,
         product_amount,
         product_price,
         CASE 
@@ -98,23 +106,38 @@ WITH stg_glamira__order_rename AS (
 
 , stg_glamira__product_grouping AS (
     SELECT
-                                date_key,
-                                user_key,
-                                store_key,
-                                location_key,
-                                order_key,
-                                product_key,
-                                local_time,
-                                ip_address,
-                                product_option,
-                                currency_symbol,
-        SUM(product_amount)     AS product_amount,
+        date_key                                    AS date_key,
+        user_key                                    AS user_key,
+        store_key                                   AS store_key,
+        location_key                                AS location_key,
+        order_key                                   AS order_key,
+        product_key                                 AS product_key,
+        local_time                                  AS local_time,
+        ip_address                                  AS ip_address,
+        TRANSLATE(
+            CASE
+                WHEN LOWER(TRIM(stone_option)) IS NULL
+                    THEN 'XNA'
+                WHEN LOWER(TRIM(stone_option)) LIKE '%saphire%'
+                    THEN 'sapphire'
+                ELSE LOWER(TRIM(stone_option))
+            END
+        , '-_', '  ')                               AS stone_option,
+        TRANSLATE(
+            CASE
+                WHEN LOWER(TRIM(alloy_option)) IS NULL
+                    THEN 'XNA'
+                ELSE LOWER(TRIM(alloy_option))
+            END
+        , '-_', '  ')                               AS alloy_option,
+        currency_symbol                             AS currency_symbol,
+        SUM(product_amount)                         AS product_amount,
         AVG(
             CASE
                 WHEN product_price = 0 THEN NULL
                 ELSE product_price
             END
-        )                       AS product_unit_price
+        )                                           AS product_unit_price
     FROM
         stg_glamira__value_standardize
     GROUP BY
@@ -126,7 +149,8 @@ WITH stg_glamira__order_rename AS (
         order_key,
         product_key,
         local_time,
-        product_option,
+        stone_option,
+        alloy_option,
         currency_symbol
 )
 
@@ -150,7 +174,8 @@ WITH stg_glamira__order_rename AS (
         o.product_key                                   AS product_key,
         o.local_time                                    AS local_time,
         o.ip_address                                    AS ip_address,
-        o.product_option                                AS product_option,
+        o.stone_option                                  AS stone_option,
+        o.alloy_option                                  AS alloy_option,
         o.currency_symbol                               AS currency_symbol,
         o.product_amount                                AS product_amount,
         o.product_unit_price                            AS product_unit_price,
@@ -161,6 +186,36 @@ WITH stg_glamira__order_rename AS (
     LEFT JOIN
         stg_glamira__exchange_load e
     USING (currency_symbol)
+)
+
+, stg_glamira__option_load AS (
+    SELECT
+        *
+    FROM
+        {{ ref("stg_glamira__product_option") }}
+)
+
+, stg_glamira__join_option AS (
+    SELECT
+        a.date_key                                      AS date_key,
+        a.user_key                                      AS user_key,
+        a.store_key                                     AS store_key,
+        a.location_key                                  AS location_key,
+        a.order_key                                     AS order_key,
+        a.product_key                                   AS product_key,
+        o.option_key                                    AS option_key,
+        a.local_time                                    AS local_time,
+        a.ip_address                                    AS ip_address,
+        a.currency_symbol                               AS currency_symbol,
+        a.product_amount                                AS product_amount,
+        a.product_unit_price                            AS product_unit_price,
+        a.exchange_rate_to_usd                          AS exchange_rate_to_usd,
+        a.product_price_usd                             AS product_price_usd
+    FROM
+        stg_glamira__join_exchange_rate a
+    LEFT JOIN
+        stg_glamira__option_load o
+    ON (a.stone_option = o.stone_option AND a.alloy_option = o.alloy_option)
 )
 
 , stg_glamira__order_gen_key AS (
@@ -175,10 +230,49 @@ SELECT
     ) AS sales_order_key,
     *
 FROM
-    stg_glamira__join_exchange_rate
+    stg_glamira__join_option
+)
+
+, fact_sales_order__null_handle AS (
+    SELECT
+        COALESCE(sales_order_key, -1)                           AS sales_order_key,
+        COALESCE(date_key, -1)                                  AS date_key,
+        COALESCE(user_key, -1)                                  AS user_key,
+        COALESCE(store_key, -1)                                 AS store_key,
+        COALESCE(location_key, -1)                              AS location_key,
+        COALESCE(order_key, -1)                                 AS order_key,
+        COALESCE(product_key, -1)                               AS product_key,
+        COALESCE(option_key, -1)                                AS option_key,
+        COALESCE(local_time, DATETIME '1900-01-01 00:00:00')    AS local_time,
+        COALESCE(ip_address, 'XNA')                             AS ip_address,
+        COALESCE(currency_symbol, 'XNA')                        AS currency_symbol,
+        COALESCE(product_amount, 0)                             AS product_amount,
+        COALESCE(product_unit_price, 0)                         AS product_unit_price,
+        COALESCE(exchange_rate_to_usd, 0)                       AS exchange_rate_to_usd,
+        COALESCE(product_price_usd, 0)                          AS product_price_usd
+    FROM
+        stg_glamira__order_gen_key
+    UNION ALL
+    SELECT
+        -1                              AS sales_order_key,
+        -1                              AS date_key,
+        -1                              AS user_key,
+        -1                              AS store_key,
+        -1                              AS location_key,
+        -1                              AS order_key,
+        -1                              AS product_key,
+        -1                              AS option_key,
+        DATETIME('1900-01-01 00:00:00') AS local_time,
+        'XNA'                           AS ip_address,
+        'XNA'                           AS currency_symbol,
+        0                               AS product_amount,
+        0                               AS product_unit_price,
+        0                               AS exchange_rate_to_usd,
+        0                               AS product_price_usd
 )
 
 SELECT 
+    CURRENT_TIMESTAMP() AS created_at_utc,
     * 
 FROM 
-    stg_glamira__order_gen_key
+    fact_sales_order__null_handle

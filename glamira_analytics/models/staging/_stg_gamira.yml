@@ -45,3 +45,27 @@ models:
           - relationships:
               field: symbol
               to: ref('stg_glamira__raw_exchange_rate')
+  - name: stg_glamira__product_option_alloy
+    description: "Staging table for product alloy options"
+    columns:
+      - name: alloy_key
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+  - name: stg_glamira__product_option_stone
+    description: "Staging table for product stone options"
+    columns:
+      - name: stone_key
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+  - name: stg_glamira__product_option
+    description: "Staging table for product options"
+    columns:
+      - name: option_key
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
