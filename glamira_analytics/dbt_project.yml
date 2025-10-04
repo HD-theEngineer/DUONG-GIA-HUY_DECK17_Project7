@@ -36,6 +36,8 @@ models:
       +materialized: view
     core:
       +materialized: table
+    marts:
+      +materialized: table
 seeds:
   glamira_analytics:
     +enabled: true
